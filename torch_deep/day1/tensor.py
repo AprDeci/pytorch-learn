@@ -55,3 +55,20 @@ einsum_ab_1 = torch.einsum("ij,jk->ik", a, b)
 einsum_ab_2 = torch.einsum("ij->ji", a)
 print("矩阵乘法 einsum_ab_1:", einsum_ab_1)
 print("转置 einsum_ab_2:", einsum_ab_2)
+
+# 用你 noisy 的代码扩展）：
+# 生成 3x5 噪声矩阵 noisy_mat = torch.randn(3,5)；用 where 把负变0；
+# 用 gather 取每行最大值的位置（index 用 torch.argmax(dim=1)）；
+# 最后 expand 到 6x5（重复2次）。
+noisy_mat = torch.randn(3, 5)
+noisy_mat = torch.where(noisy_mat > 0, noisy_mat, torch.zeros_like(noisy_mat))
+# 步骤3: argmax 找每行最大位置 (keepdim=True 让它 [3,1])
+max_indices = torch.argmax(noisy_mat, dim=1, keepdim=True)  # [3,1]
+print("\n最大索引:", max_indices)  # e.g., tensor([[3], [2], [0]])
+
+# 步骤4: gather 取每行的最大值 (index 现在 [3,1]，匹配2D)
+max_values = noisy_mat.gather(1, max_indices)  # [3,1]，每行取1个最大值
+print("gather 后 (最大值):", max_values)
+
+noisy_mat = max_values.expand(6, 1)
+print("noisy_mat:", noisy_mat.shape)
