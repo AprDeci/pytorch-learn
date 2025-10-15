@@ -41,33 +41,38 @@ jac_lin = torch.autograd.functional.jacobian(linear_fn, x_lin)
 print("\n线性 Jacobian (就是 A):", jac_lin)
 
 
-from torchviz import make_dot
 import torch
+from torchview import draw_graph  # 导入
 
-# 完整示例：简单计算图
-x = torch.tensor(1.0, requires_grad=True)
-y = x**2 + 3 * x  # x → PowBackward0 → MulBackward0 → AddBackward0 → y
-y.backward()  # 建图
+torch.manual_seed(42)
 
-# 可视化
-dot = make_dot(y, params={"x": x})
-dot.render("compute_graph", format="png")  # 保存 PNG
-print("计算图已保存: compute_graph.png (节点: x → y，边: 梯度)")
+# 先修复你的 Jacobian 示例（正确输出 [[1,2],[3,4]]）
+A = torch.tensor([[1.0, 2.0], [3.0, 4.0]])  # 去掉 requires_grad=False（A 不需梯度）
+b = torch.tensor([0.5, 0.5])
 
 
-# 复杂点：小网络
+def linear_fn(x):
+    return A @ x + b
+
+
+x_lin = torch.tensor([1.0, 1.0], requires_grad=True)
+jac_lin = torch.autograd.functional.jacobian(linear_fn, x_lin)
+print("线性 Jacobian (就是 A):", jac_lin)  # 正确: tensor([[1., 2.], [3., 4.]])
+
+
+# 现在画图：只画模型（tensor 计算图跳过，或用下面 TensorBoard）
 class SimpleNet(torch.nn.Module):
     def __init__(self):
         super().__init__()
-        self.linear = torch.nn.Linear(1, 1)
+        self.linear = torch.nn.Linear(1, 1)  # 输入1维
 
     def forward(self, x):
         return self.linear(x) ** 2
 
 
 net = SimpleNet()
-input = torch.tensor([[1.0]], requires_grad=True)
-output = net(input)
-dot_net = make_dot(output, params=dict(net.named_parameters()))
-dot_net.render("net_graph", format="png")
-print("网络图已保存: net_graph.png")
+# 用 input_size=(1,1)：batch=1, features=1（Linear 输入）
+net_graph = draw_graph(
+    net, input_size=(1, 1), depth=3, save_graph=True, filename="torchview_net.png"
+)
+print("网络图已保存: torchview_net.png")  # 生成 PNG，无报错
