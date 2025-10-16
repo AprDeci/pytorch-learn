@@ -54,6 +54,7 @@ class DropoutNet(nn.Module):
             nn.Dropout(dropout_p),
             nn.Linear(128, 64),
             nn.ReLU(),
+            nn.Dropout(dropout_p),
             nn.Linear(64, 10),
         )
 
