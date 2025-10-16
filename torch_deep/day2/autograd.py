@@ -41,7 +41,6 @@ jac_lin = torch.autograd.functional.jacobian(linear_fn, x_lin)
 print("\n线性 Jacobian (就是 A):", jac_lin)
 
 
-import torch
 from torchview import draw_graph  # 导入
 
 torch.manual_seed(42)
