@@ -40,11 +40,11 @@ train_loader = DataLoader(train_ds, batch_size=64, shuffle=True)
 class SimpleCNN(nn.Module):
     def __init__(self):
         super().__init__()
-        self.conv1 = nn.Conv2d(
+        self.conv1 = nn.Conv2d(  # 卷积层
             1, 32, kernel_size=3, padding=1
-        )  # 输入1通道，32滤镜，3x3核
-        self.pool = nn.MaxPool2d(2, 2)  # 2x2 MaxPool
-        self.conv2 = nn.Conv2d(32, 64, kernel_size=3, padding=1)  # 32→64
+        )  # 输入1通道，32滤镜，3x3核 输出[32,28,28]
+        self.pool = nn.MaxPool2d(2, 2)  # 2x2 MaxPool 输出[32,14,14]
+        self.conv2 = nn.Conv2d(32, 64, kernel_size=3, padding=1)  # 32→64 输出[64,14,14]
         self.fc1 = nn.Linear(64 * 7 * 7, 128)  # 展平后 (28/4=7)
         self.fc2 = nn.Linear(128, 10)  # 10类
         self.relu = nn.ReLU()
