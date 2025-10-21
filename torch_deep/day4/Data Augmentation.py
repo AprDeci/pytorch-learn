@@ -14,10 +14,12 @@ def get_loaders(batch_size=128, augmented=False):
     if augmented:
         transform_train = transforms.Compose(
             [
-                transforms.RandomCrop(32, padding=4),
-                transforms.RandomHorizontalFlip(),
-                transforms.RandomRotation(degrees=15),
-                transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2),
+                transforms.RandomCrop(32, padding=4),  # 随机裁剪 输出32*32 填充4
+                transforms.RandomHorizontalFlip(),  # 随机水平翻转
+                transforms.RandomRotation(degrees=15),  # 随机旋转
+                transforms.ColorJitter(
+                    brightness=0.2, contrast=0.2, saturation=0.2
+                ),  # 随机调整亮度、对比度、饱和度
                 transforms.ToTensor(),
                 transforms.Normalize(
                     (0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)
@@ -66,8 +68,8 @@ class CIFARCNN(nn.Module):
 
     def forward(self, x):
         x = self.pool(self.relu(self.conv1(x)))  # [32,32,32] -> [32,16,16]
-        x = self.pool(self.relu(self.conv2(x)))  # [64,16,16] -> [64,8,8]
-        x = self.pool(self.relu(self.conv3(x)))  # [128,8,8] -> [128,4,4]
+        x = self.pool(self.relu(self.conv2(x)))  # [32,16,16] -> [64,8,8]
+        x = self.pool(self.relu(self.conv3(x)))  # [64,8,8] -> [128,4,4]
         x = x.view(x.size(0), -1)
         x = self.relu(self.fc1(x))
         x = self.dropout(x)
