@@ -25,7 +25,7 @@ class HouseDataset(Dataset):
     def __init__(self, csv_file, transform=None):
         self.data = pd.read_csv(csv_file)
         self.transform = transform
-        self.features = self.data[["area", "rooms"]].values  # 输入X
+        self.features = self.data[["area", "room"]].values  # 输入X
         self.labels = self.data["price"].values.reshape(-1, 1)  # 输出Y
 
     def __len__(self):
@@ -42,3 +42,12 @@ class HouseDataset(Dataset):
 train_df, val_df = train_test_split(df, test_size=0.2, random_state=42)
 train_df.to_csv("train.csv", index=False)
 val_df.to_csv("val.csv", index=False)
+
+train_ds = HouseDataset("train.csv")
+val_ds = HouseDataset("val.csv")
+
+train_loader = DataLoader(train_ds, batch_size=32, shuffle=True)
+val_loader = DataLoader(val_ds, batch_size=32, shuffle=False)
+
+x, y = next(iter(train_loader))
+print(f"批次形状: X {x.shape} [32,2], Y {y.shape} [32,1]")
