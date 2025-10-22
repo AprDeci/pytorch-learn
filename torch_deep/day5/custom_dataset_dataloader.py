@@ -59,7 +59,7 @@ class HouseMLP(nn.Module):
     def __init__(self) -> None:
         super().__init__()
         self.fc = nn.Sequential(
-            nn.Linear(2, 64), nn.ReLU(), nn.Linear(64, 1), nn.ReLU(), nn.Linear(1, 1)
+            nn.Linear(2, 64), nn.ReLU(), nn.Linear(64, 32), nn.ReLU(), nn.Linear(32, 1)
         )
 
     def forward(self, x):
