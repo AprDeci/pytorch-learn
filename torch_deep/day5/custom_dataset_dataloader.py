@@ -15,8 +15,10 @@ print(f"用设备: {device}")
 
 data = {
     "area": np.random.uniform(50, 200, 1000),
-    "price": np.random.randint(100, 500, 1000),
     "room": np.random.randint(1, 5, 1000),
+    "price": 2 * np.random.uniform(50, 200, 1000)
+    + 50 * np.random.randint(1, 5, 1000)
+    + np.random.normal(0, 20, 1000),  # 加规律 + 噪声
 }
 df = pd.DataFrame(data)
 df.to_csv("house_prices.csv", index=False)
@@ -97,12 +99,12 @@ criterion = nn.MSELoss()  # 回归用均方误差
 optimizer = optim.Adam(model.parameters(), lr=0.01)
 
 train_losses, val_losses = [], []
-for epoch in range(5000):
+for epoch in range(50):
     tl = train_epoch(model, train_loader, criterion, optimizer)
     vl = val_epoch(model, val_loader, criterion)
     train_losses.append(tl)
     val_losses.append(vl)
-    if (epoch + 1) % 100 == 0:
+    if (epoch + 1) % 10 == 0:
         print(f"Epoch {epoch+1}: Train Loss {tl:.4f}, Val Loss {vl:.4f}")
 
 # 画曲线
