@@ -1,10 +1,12 @@
 import torch
+from torch.nn.qat import Linear
 from torch.utils.data import Dataset, DataLoader
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split  # 分 train/val
 import torch.nn as nn
 import torch.optim as optim
+import matplotlib.pyplot as plt
 
 torch.manual_seed(42)
 np.random.seed(42)
@@ -51,3 +53,61 @@ val_loader = DataLoader(val_ds, batch_size=32, shuffle=False)
 
 x, y = next(iter(train_loader))
 print(f"批次形状: X {x.shape} [32,2], Y {y.shape} [32,1]")
+
+
+class HouseMLP(nn.Module):
+    def __init__(self) -> None:
+        super().__init__()
+        self.fc = nn.Sequential(
+            nn.Linear(2, 64), nn.ReLU(), nn.Linear(64, 1), nn.ReLU(), nn.Linear(1, 1)
+        )
+
+    def forward(self, x):
+        return self.fc(x)
+
+
+def train_epoch(model, loader, criterion, optimizer):
+    model.train()
+    total_loss = 0
+    for x, y in loader:
+        x, y = x.to(device), y.to(device)
+        outputs = model(x)
+        loss = criterion(outputs, y)
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+        total_loss += loss.item()
+    return total_loss / len(loader)
+
+
+def val_epoch(model, loader, criterion):
+    model.eval()
+    total_loss = 0
+    with torch.no_grad():
+        for x, y in loader:
+            x, y = x.to(device), y.to(device)
+            outputs = model(x)
+            loss = criterion(outputs, y)
+            total_loss += loss.item()
+    return total_loss / len(loader)
+
+
+model = HouseMLP().to(device)
+criterion = nn.MSELoss()  # 回归用均方误差
+optimizer = optim.Adam(model.parameters(), lr=0.01)
+
+train_losses, val_losses = [], []
+for epoch in range(5000):
+    tl = train_epoch(model, train_loader, criterion, optimizer)
+    vl = val_epoch(model, val_loader, criterion)
+    train_losses.append(tl)
+    val_losses.append(vl)
+    if (epoch + 1) % 100 == 0:
+        print(f"Epoch {epoch+1}: Train Loss {tl:.4f}, Val Loss {vl:.4f}")
+
+# 画曲线
+plt.plot(train_losses, label="Train Loss")
+plt.plot(val_losses, label="Val Loss")
+plt.title("House Price Prediction Loss")
+plt.legend()
+plt.show()
